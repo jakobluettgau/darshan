@@ -1022,9 +1022,8 @@ class DarshanReport(object):
         recs = data['records']
         for mod in recs:
             try:
-                #recs[mod] = recs[mod].to_dict()
                 recs[mod] = recs[mod].to_list()
-            except:
+            except KeyError:
                 recs[mod] = "Not implemented."
 
 
@@ -1042,14 +1041,7 @@ class DarshanReport(object):
         Return:
             JSON String
         """
-        data = copy.deepcopy(self.data)
-
-        recs = data['records']
-        for mod in recs:
-            try:
-                recs[mod] = recs[mod].to_list()
-            except:
-                recs[mod] = "Not implemented."
+        data = self.to_dict() 
 
         return json.dumps(data, cls=DarshanReportJSONEncoder)
 

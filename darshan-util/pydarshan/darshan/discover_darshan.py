@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 verbose_discovery = False
 if verbose_discovery:
-    logging.basicConfig()           # ensure out streams exist
+    logging.basicConfig()           # ensure out stream exist
     logger.setLevel(logging.DEBUG)  # set log-level
 
 
@@ -165,7 +165,7 @@ def find_utils(ffi, libdutil):
     if libdutil is None:
         try:
             libdutil = ffi.dlopen("libdarshan-util.so")
-        except:
+        except RuntimeError:
             libdutil = None
 
     if libdutil is None:
@@ -173,7 +173,7 @@ def find_utils(ffi, libdutil):
             library_path = discover_darshan_shutil()
             logger.debug(f"Attempting library_path={library_path} via shutil discovery.")
             libdutil = ffi.dlopen(library_path + "/lib/libdarshan-util.so")
-        except:
+        except RuntimeError:
             libdutil = None
 
     if libdutil is None:
@@ -181,7 +181,7 @@ def find_utils(ffi, libdutil):
             library_path = discover_darshan_pkgconfig()
             logger.debug(f"Attempting library_path={library_path} via pkgconfig discovery.")
             libdutil = ffi.dlopen(library_path + "/lib/libdarshan-util.so")
-        except:
+        except RuntimeError:
             libdutil = None
 
     if libdutil is None:
@@ -194,7 +194,7 @@ def find_utils(ffi, libdutil):
             os.chdir(darshan_path)
             libdutil = ffi.dlopen(library_path)
             os.chdir(save)
-        except:
+        except RuntimeError:
             libdutil = None
     
     if libdutil is None:
@@ -207,7 +207,7 @@ def find_utils(ffi, libdutil):
             os.chdir(darshan_path)
             libdutil = ffi.dlopen(library_path)
             os.chdir(save)
-        except:
+        except RuntimeError:
             libdutil = None
   
     

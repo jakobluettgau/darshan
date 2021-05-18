@@ -24,19 +24,19 @@ addins = ""
 # Optional APXC module
 #
 try:
-  from darshan.backend.apxc import *
-  addins += get_apxc_defs()
-except:
-  pass
+    from darshan.backend.apxc import *
+    addins += get_apxc_defs()
+except ImportError:
+    pass
 
 #
 # Optional APMPI module
 #
 try:
-  from darshan.backend.apmpi import *
-  addins += get_apmpi_defs()
-except:
-  pass
+    from darshan.backend.apmpi import *
+    addins += get_apmpi_defs()
+except ImportError:
+    pass
 
 API_def_c = load_darshan_header(addins)
 
