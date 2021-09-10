@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-verbose_discovery = False
+verbose_discovery = True
 if verbose_discovery:
     logging.basicConfig()           # ensure out streams exist
     logger.setLevel(logging.DEBUG)  # set log-level
@@ -110,7 +110,7 @@ def discover_darshan_shutil():
     import shutil    
     path = shutil.which('darshan-parser')
    
-    if path:
+    if path is not None:
         return os.path.realpath(path + '/../../')
     else:
         raise RuntimeError('Could not discover darshan! Is darshan-util installed and set in your PATH?')
@@ -164,24 +164,28 @@ def find_utils(ffi, libdutil):
     """
     if libdutil is None:
         try:
+            logger.debug(f"Attempting direct load via dlopen.")
             libdutil = ffi.dlopen("libdarshan-util.so")
-        except:
+        except OSError as e:
+            logger.debug(f"Coudln't load libdarshan-util via dlopen directly.")
             libdutil = None
 
     if libdutil is None:
         try:
             library_path = discover_darshan_shutil()
-            logger.debug(f"Attempting library_path={library_path} via shutil discovery.")
+            logger.debug(f"Attempting library_path={library_path} via shutil/which.")
             libdutil = ffi.dlopen(library_path + "/lib/libdarshan-util.so")
-        except:
+        except (OSError, RuntimeError) as e:
+            logger.debug(f"Couldn't load libdarshan-util via shutil discovery.")
             libdutil = None
 
     if libdutil is None:
         try:
             library_path = discover_darshan_pkgconfig()
-            logger.debug(f"Attempting library_path={library_path} via pkgconfig discovery.")
+            logger.debug(f"Attempting library_path={library_path} via pkconfig.")
             libdutil = ffi.dlopen(library_path + "/lib/libdarshan-util.so")
-        except:
+        except (OSError, RuntimeError) as e:
+            logger.debug(f"Couldn't load libdarshan-util via pkgconfig discovery.")
             libdutil = None
 
     if libdutil is None:
@@ -189,26 +193,27 @@ def find_utils(ffi, libdutil):
             darshan_path = discover_darshan_wheel()
             import glob
             library_path = glob.glob(f'{darshan_path}/libdarshan-util*.so')[0]
-            logger.debug(f"Attempting library_path={library_path} in case of binary wheel.")
+            logger.debug(f"Attempting library_path={library_path} for binary wheel.")
             save = os.getcwd()
             os.chdir(darshan_path)
             libdutil = ffi.dlopen(library_path)
             os.chdir(save)
-        except:
-            libdutil = None
+        except (OSError, IndexError) as e:
+            logger.debug(f"Couldn't load libdarshan-util from binery wheel.")
+
     
     if libdutil is None:
         try:
             darshan_path = discover_darshan_pyinstaller()
             import glob
             library_path = glob.glob(f'{darshan_path}/libdarshan-util*.so')[0]
-            logger.debug(f"Attempting library_path={library_path} for pyinstaller bundles.")
+            logger.debug(f"Attempting library_path={library_path} for pyinstaller bundle.")
             save = os.getcwd()
             os.chdir(darshan_path)
             libdutil = ffi.dlopen(library_path)
             os.chdir(save)
-        except:
-            libdutil = None
+        except (OSError, IndexError) as e:
+            logger.debug(f"Couldn't load libdarshan-util from  pyinstaller bundle.")
   
     
     
